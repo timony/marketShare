@@ -7,6 +7,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -36,6 +37,12 @@ public class Market {
         return new Market(shares.stream()
                 .filter(predicate)
                 .toList());
+    }
+
+    public Optional<Share> findShare(String vendor, String quoter) {
+        return shares.stream()
+                .filter(share -> share.getVendor().equals(vendor) && share.getQuoter().equals(quoter))
+                .findFirst();
     }
 
     public Market sorted(Comparator<Share> comparator) {
