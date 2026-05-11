@@ -13,6 +13,6 @@ public class InputRecordReaderProvider {
         if (extension.endsWith("csv")) {
             return new CsvFileInputRecordReader(file);
         }
-        throw new UnsupportedOperationException("Unsupported file format");
+        throw new UnsupportedOperationException(String.format("Unsupported file type: %s", extension));
     }
 }
