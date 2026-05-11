@@ -4,6 +4,9 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 
+/**
+ * Factory class for creating InputRecordReader instances based on the file extension.
+ */
 public class InputRecordReaderProvider {
 
     private InputRecordReaderProvider() {}

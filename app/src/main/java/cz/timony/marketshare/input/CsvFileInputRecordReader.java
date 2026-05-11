@@ -10,6 +10,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * An implementation of {@link InputRecordReader} that reads input records from a CSV file.
+ * This class is responsible for parsing a CSV file where the first row contains
+ * column headers. It maps the data in each row to an instance of {@link InputRecord}.
+ * Provides mechanisms for parsing the following columns in the CSV:
+ * - Country
+ * - Timescale
+ * - Vendor
+ * - Units
+ * The parsed data is then transformed into a list of {@link InputRecord} objects
+ * for further processing.
+ * Validation:
+ * - The constructor validates the existence of the specified file. If the file does not exist, an
+ *   {@link IllegalArgumentException} is thrown.
+ * Error handling:
+ * - Handles {@link IOException} for general file reading issues.
+ * - Handles {@link com.opencsv.exceptions.CsvValidationException} for CSV parsing issues
+ *   and rethrows it as an {@link IOException}.
+ */
 public class CsvFileInputRecordReader implements InputRecordReader {
 
     private final File inputFile;

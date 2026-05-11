@@ -33,39 +33,76 @@ public class Market {
         calculatePercentages();
     }
 
+    /**
+     * Returns a new Market instance with shares filtered by the given predicate.
+     * @param predicate the predicate to filter shares
+     * @return a new Market instance with filtered shares
+     */
     public Market getSubmarket(Predicate<Share> predicate) {
         return new Market(shares.stream()
                 .filter(predicate)
                 .toList());
     }
 
+    /**
+     * Returns the share with the given vendor and quoter if exists
+     * @param vendor the name of the vendor
+     * @param quoter the quoter
+     * @return Optional of the share
+     */
     public Optional<Share> findShare(String vendor, String quoter) {
         return shares.stream()
                 .filter(share -> share.getVendor().equals(vendor) && share.getQuoter().equals(quoter))
                 .findFirst();
     }
 
+    /**
+     * Returns a new Market instance with shares sorted by the given comparator.
+     * @param comparator the comparator to sort shares
+     * @return a new Market instance with sorted shares
+     */
     public Market sorted(Comparator<Share> comparator) {
         shares.sort(comparator);
         return this;
     }
 
+    /**
+     * Returns a new Market instance with shares sorted by vendor.
+     * @return a new Market instance with sorted shares
+     */
     public Market sortedByVendor() {
         return sorted(Comparator.comparing(Share::getVendor));
     }
 
+    /**
+     * Returns a new Market instance with shares sorted by units descending.
+     * @return a new Market instance with sorted shares
+     */
     public Market sortedByUnitsDescending() {
         return sorted(Comparator.comparingLong(Share::getUnits).reversed());
     }
 
+    /**
+     * Returns the sum of total units of all shares.
+     * @return the total units
+     */
     public double getTotal() {
         return total;
     }
 
+    /**
+     * Returns the list of shares.
+     * @return the list of shares
+     */
     public List<Share> getShares() {
         return shares;
     }
 
+    /**
+     * Returns row number of the first row of the given vendor in the market.
+     * @param vendor the name of the vendor
+     * @return row number of the first row of the given vendor in the market
+     */
     public OptionalInt getRowNumberOfVendor(String vendor) {
         return shares.stream()
                 .filter(share -> share.getVendor().equals(vendor))
