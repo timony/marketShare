@@ -1,5 +1,7 @@
 package cz.timony.marketshare.domain;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -7,6 +9,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Market {
+
+    private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
+    private static final int PERCENT_SCALE = 1;
 
     private final List<Share> shares;
     private final double total;
@@ -68,21 +73,29 @@ public class Market {
      * Using Hare-Niemayer algorithm. For the sake of simplicity not fully implemented.
      */
     private void calculatePercentages() {
-        double cumulatedTotal = 0.0;
+        BigDecimal cumulatedTotal = BigDecimal.ZERO;
+        BigDecimal totalAsBigDecimal = BigDecimal.valueOf(total);
 
         for (Share share : shares) {
-            double sharePercent = total == 0 ? 0.0 : (share.getUnits() * 100.0) / total;
-            double roundedPercent = Math.round(sharePercent * 10.0) / 10.0;
-            cumulatedTotal += roundedPercent;
+            BigDecimal roundedPercent = total == 0
+                    ? BigDecimal.ZERO.setScale(PERCENT_SCALE, RoundingMode.HALF_UP)
+                    : BigDecimal.valueOf(share.getUnits())
+                            .multiply(HUNDRED)
+                            .divide(totalAsBigDecimal, 10, RoundingMode.HALF_UP)
+                            .setScale(PERCENT_SCALE, RoundingMode.HALF_UP);
+
+            cumulatedTotal = cumulatedTotal.add(roundedPercent);
             share.setPercentage(roundedPercent);
         }
 
-        if (cumulatedTotal != 100.0) {
-            double difference = 100.0 - cumulatedTotal;
+        if (cumulatedTotal.compareTo(HUNDRED) != 0) {
+            BigDecimal difference = HUNDRED.subtract(cumulatedTotal);
             shares.stream()
-                    .max(Comparator.comparingDouble(Share::getUnits))
+                    .max(Comparator.comparingLong(Share::getUnits))
                     .ifPresent(shareToAdjust ->
-                        shareToAdjust.setPercentage(shareToAdjust.getPercentage() + difference)
+                        shareToAdjust.setPercentage(
+                                shareToAdjust.getPercentage().add(difference).setScale(PERCENT_SCALE, RoundingMode.HALF_UP)
+                        )
                     );
         }
     }

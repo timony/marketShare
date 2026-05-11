@@ -31,7 +31,8 @@ public class HtmlMarketExporter implements MarkerExporter {
                     .append("</td><td>")
                     .append(formatUnits(row.getUnits()))
                     .append("</td><td>")
-                    .append(String.format(Locale.US, "%.1f%%", row.getPercentage()))
+                    .append(row.getPercentage().toPlainString())
+                    .append('%')
                     .append("</td></tr>\n");
         }
 

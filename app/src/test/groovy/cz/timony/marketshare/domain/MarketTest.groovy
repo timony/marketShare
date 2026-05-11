@@ -2,6 +2,8 @@ package cz.timony.marketshare.domain
 
 import spock.lang.Specification
 
+import java.math.BigDecimal
+
 class MarketTest extends Specification {
 
     def 'should the calculated percentages sum to 100%'() {
@@ -20,10 +22,31 @@ class MarketTest extends Specification {
 
         then:
         market.shares.size() == size
-        market.shares.sum { it.percentage } == 100.0
+        market.shares.every { it.percentage instanceof BigDecimal }
+        market.shares.collect { it.percentage }.inject(BigDecimal.ZERO) { acc, value -> acc.add(value) }
+                .compareTo(new BigDecimal('100.0')) == 0
 
         where:
         size << [1, 10, 50, 100, 200]
+    }
+
+    def 'should round percentages to one decimal using BigDecimal'() {
+        given:
+        def shares = [
+                new Share('Vendor A', '2010 Q3', 1),
+                new Share('Vendor B', '2010 Q3', 1),
+                new Share('Vendor C', '2010 Q3', 1)
+        ]
+
+        when:
+        def market = new Market(shares)
+
+        then:
+        market.shares.collect { it.percentage }.sort() == [
+                new BigDecimal('33.3'),
+                new BigDecimal('33.3'),
+                new BigDecimal('33.4')
+        ]
     }
 
     def 'should calculate total units correctly'() {
@@ -85,5 +108,10 @@ class MarketTest extends Specification {
         then:
         market.shares.size() == 3
         market.total == 0
+        market.shares.collect { it.percentage }.sort() == [
+                new BigDecimal('0.0'),
+                new BigDecimal('0.0'),
+                new BigDecimal('100.0')
+        ]
     }
 }

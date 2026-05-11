@@ -1,10 +1,12 @@
 package cz.timony.marketshare.domain;
 
+import java.math.BigDecimal;
+
 public class Share{
     private final String vendor;
     private final String quoter;
     private final long units;
-    private double percentage;
+    private BigDecimal percentage = BigDecimal.ZERO;
 
     public Share(String vendor, String quoter, long units) {
         this.vendor = vendor;
@@ -24,11 +26,11 @@ public class Share{
         return units;
     }
 
-    public void setPercentage(double percentage) {
+    public void setPercentage(BigDecimal percentage) {
         this.percentage = percentage;
     }
 
-    public double getPercentage() {
+    public BigDecimal getPercentage() {
         return percentage;
     }
 }
