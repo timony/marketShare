@@ -1,10 +1,13 @@
 package cz.timony.marketshare.domain;
 
+import org.jspecify.annotations.NonNull;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -14,31 +17,18 @@ public class Market {
     private static final int PERCENT_SCALE = 1;
 
     private final List<Share> shares;
-    private final double total;
+    private final long total;
 
     public Market(List<Share> shares) {
         if (shares == null) {
             throw new IllegalArgumentException("Shares list cannot be null");
         }
 
-        this.shares = shares.stream()
-                .collect(Collectors.groupingBy(Share::getVendor,
-                        Collectors.groupingBy(Share::getQuoter, Collectors.summingLong(Share::getUnits))
-                ))
-                .entrySet().stream()
-                .flatMap(vendorEntry -> vendorEntry.getValue()
-                        .entrySet().stream()
-                        .map(quoterEntry -> new Share(
-                                vendorEntry.getKey(),
-                                quoterEntry.getKey(),
-                                quoterEntry.getValue()
-                        )))
-                .collect(Collectors.toCollection(ArrayList::new));
-
         this.total = shares.stream()
-                .mapToDouble(Share::getUnits)
+                .mapToLong(Share::getUnits)
                 .sum();
 
+        this.shares = getMergedShares(shares);
         calculatePercentages();
     }
 
@@ -69,8 +59,15 @@ public class Market {
         return shares;
     }
 
+    public OptionalInt getRowNumberOfVendor(String vendor) {
+        return shares.stream()
+                .filter(share -> share.getVendor().equals(vendor))
+                .mapToInt(share -> shares.indexOf(share) + 1)
+                .findFirst();
+    }
+
     /**
-     * Using Hare-Niemayer algorithm. For the sake of simplicity not fully implemented.
+     * Using Hare-Niemayer algorithm. For the sake of simplicity, only the biggest share is adjusted.
      */
     private void calculatePercentages() {
         BigDecimal cumulatedTotal = BigDecimal.ZERO;
@@ -98,6 +95,22 @@ public class Market {
                         )
                     );
         }
+    }
+
+    private static @NonNull ArrayList<Share> getMergedShares(List<Share> shares) {
+        return shares.stream()
+                .collect(Collectors.groupingBy(Share::getVendor,
+                        Collectors.groupingBy(Share::getQuoter, Collectors.summingLong(Share::getUnits))
+                ))
+                .entrySet().stream()
+                .flatMap(vendorEntry -> vendorEntry.getValue()
+                        .entrySet().stream()
+                        .map(quoterEntry -> new Share(
+                                vendorEntry.getKey(),
+                                quoterEntry.getKey(),
+                                quoterEntry.getValue()
+                        )))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
 }

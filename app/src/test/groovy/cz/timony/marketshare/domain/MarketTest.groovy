@@ -27,7 +27,7 @@ class MarketTest extends Specification {
                 .compareTo(new BigDecimal('100.0')) == 0
 
         where:
-        size << [1, 10, 50, 100, 200]
+        size << [1, 10, 50, 100, 200, 1000]
     }
 
     def 'should round percentages to one decimal using BigDecimal'() {
@@ -113,5 +113,30 @@ class MarketTest extends Specification {
                 new BigDecimal('0.0'),
                 new BigDecimal('100.0')
         ]
+    }
+
+    def 'should return row number of the share'() {
+        given:
+        def shares = [
+                new Share('Vendor A', '2010 Q3', 10000),
+                new Share('Vendor B', '2010 Q3', 20000),
+                new Share('Vendor C', '2010 Q3', 5000)
+        ]
+
+        when:
+        def market = new Market(shares)
+
+        then:
+        market.getRowNumberOfVendor('Vendor A').asInt == 1
+        market.getRowNumberOfVendor('Vendor B').asInt == 2
+        market.getRowNumberOfVendor('Vendor C').asInt == 3
+
+        when:
+        market.sortedByUnitsDescending()
+
+        then:
+        market.getRowNumberOfVendor('Vendor A').asInt == 2
+        market.getRowNumberOfVendor('Vendor B').asInt == 1
+        market.getRowNumberOfVendor('Vendor C').asInt == 3
     }
 }
