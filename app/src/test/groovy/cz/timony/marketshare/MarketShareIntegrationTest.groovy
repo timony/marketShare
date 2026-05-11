@@ -23,5 +23,7 @@ class MarketShareIntegrationTest extends Specification {
             it.units == 6172256622
             it.percentage == new BigDecimal('7.1')
         }
+
+        market.findShare('Karel', '2010 Q3').isEmpty()
     }
 }
